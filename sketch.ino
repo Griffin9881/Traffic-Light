@@ -53,13 +53,17 @@ static int ledController(struct pt *pt) {
       timestamp = millis();
       setLED(0, 0, 0);
       break;
+    // PLAY: OFF
+    case 41:
+      setLED(0, 0, 0);
+      break;
     // WHITE: ALL ON
     case 44:
       setLED(1, 1, 1);
       break;
-    // PLAY: OFF
-    case 41:
-      setLED(0, 0, 0);
+    // YELLOW ONLY
+    case 45:
+      setLED(0, 1, 0);
       break;
     // RED ONLY
     case 58:
@@ -68,10 +72,6 @@ static int ledController(struct pt *pt) {
     // GREEN ONLY
     case 59:
       setLED(1, 0, 0);
-      break;
-    // YELLOW ONLY
-    case 45:
-      setLED(0, 1, 0);
       break;
     case 168:
       break;
