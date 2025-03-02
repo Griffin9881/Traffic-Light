@@ -14,6 +14,12 @@ decode_results results;
 static struct pt ledThread, remoteThread;
 volatile bool interruptFlag = false;
 
+void setLED(int green, int yellow, int red) {
+      digitalWrite(GREEN_PIN, green);
+      digitalWrite(YELLOW_PIN, yellow);
+      digitalWrite(RED_PIN, red);
+}
+
 void setup() {
   Serial.begin(9600);
   pinMode(GREEN_PIN, OUTPUT);
@@ -35,40 +41,37 @@ static int ledController(struct pt *pt) {
   PT_BEGIN(pt);
   switch (receiver.decodedIRData.command) {
     // ON: NORMAL CYCLE
-    case FF02FD:
-      digitalWrite(RED_PIN, LOW);
-      digitalWrite(YELLOW_PIN, LOW);
-      digitalWrite(GREEN_PIN, HIGH);
+    case 40:
+      setLED(1, 0, 0);
       PT_WAIT_UNTIL(pt, millis() - timestamp > 20000 || interruptFlag);
       timestamp = millis();
-      digitalWrite(GREEN_PIN, LOW);
-      digitalWrite(YELLOW_PIN, HIGH);
+      setLED(0, 1, 0);
       PT_WAIT_UNTIL(pt, millis() - timestamp > 5000 || interruptFlag);
       timestamp = millis();
-      digitalWrite(YELLOW_PIN, LOW);
-      digitalWrite(RED_PIN, HIGH);
+      setLED(0, 0, 1);
       PT_WAIT_UNTIL(pt, millis() - timestamp > 25000 || interruptFlag);
       timestamp = millis();
-      digitalWrite(RED_PIN, LOW);
+      setLED(0, 0, 0);
       break;
-    
     // WHITE: ALL ON
-    case FF22DD:
-      digitalWrite(GREEN_PIN, HIGH);
-      digitalWrite(YELLOW_PIN, HIGH);
-      digitalWrite(RED_PIN, HIGH);
+    case 44:
+      setLED(1, 1, 1);
       break;
     // PLAY: OFF
-    case FF827D:
-      digitalWrite(GREEN_PIN, LOW);
-      digitalWrite(YELLOW_PIN, LOW);
-      digitalWrite(RED_PIN, LOW);
+    case 41:
+      setLED(0, 0, 0);
       break;
-    case 2:
+    // RED ONLY
+    case 58:
+      setLED(0, 0, 1);
       break;
-    case 194:
+    // GREEN ONLY
+    case 59:
+      setLED(1, 0, 0);
       break;
-    case 224:
+    // YELLOW ONLY
+    case 45:
+      setLED(0, 1, 0);
       break;
     case 168:
       break;
