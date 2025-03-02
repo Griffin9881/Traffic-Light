@@ -1,63 +1,68 @@
 // #include <IRremote.hpp>
 #include <IRremote.h>
 #include <IRremoteInt.h>
+#include <pt.h>
 
-int RECV_PIN = 13;
+#define GREEN_PIN 10
+#define YELLOW_PIN 11
+#define RED_PIN 12
+#define RECV_PIN 13
+
 IRrecv receiver(RECV_PIN);
 decode_results results;
 
- // name your pins:
-int green = 10;
-int yellow = 11;
-int red = 12;
+static struct pt ledThread, remoteThread;
+volatile bool interruptFlag = false;
 
-// the setup routine runs once when you press reset:
-void setup() {               
-  // initialize the digital pin as an output.
+void setup() {
   Serial.begin(9600);
-  pinMode(green, OUTPUT);
-  pinMode(yellow, OUTPUT);
-  pinMode(red, OUTPUT);
+  pinMode(GREEN_PIN, OUTPUT);
+  pinMode(YELLOW_PIN, OUTPUT);
+  pinMode(RED_PIN, OUTPUT);
+  PT_INIT(&ledThread);
+  PT_INIT(&remoteThread);
   receiver.enableIRIn();
 }
-// int  var = 0; //defines and sets initial value for variables used below
-// int var1 = 0; //defines and sets initial value for variables used below
 
-// the loop routine runs over and over again forever:
 void loop()
 {
-  // Checks received an IR signal
-  if (receiver.decode()) {
-    translateIR();
-    receiver.resume();  // Receive the next value
-  }
+  remoteController(&remoteThread);
+  ledController(&ledThread);
 }
 
-void translateIR() {
-  // Takes command based on IR code received
+static int ledController(struct pt *pt) {
+  static unsigned long timestamp = 0;
+  PT_BEGIN(pt);
   switch (receiver.decodedIRData.command) {
-    case 162:
-      digitalWrite(red, LOW);
-      digitalWrite(yellow, LOW);
-      digitalWrite(green, HIGH);   
-      delay(20000);               // holds the green light on for 20 seconds
-      digitalWrite(green, LOW);    // turns the green light off
-      delay(600);               // slight pause between lights
-      digitalWrite(yellow, HIGH);  //turns the yellow light on
-      delay(4000); //holds the yellow light for 4 seconds (watch out for that red-light camera!)
-      digitalWrite(yellow, LOW); //turns the yellow light off
-      delay(600);  //slight pause between lights
-      digitalWrite(red, HIGH);  //turns the red light on
-      delay(20000);  //holds the red light on for 20 seconds
-      digitalWrite(red, LOW);  //turns the red light off
-      delay(600);  //slight pause between lights
+    // ON: NORMAL CYCLE
+    case FF02FD:
+      digitalWrite(RED_PIN, LOW);
+      digitalWrite(YELLOW_PIN, LOW);
+      digitalWrite(GREEN_PIN, HIGH);
+      PT_WAIT_UNTIL(pt, millis() - timestamp > 20000 || interruptFlag);
+      timestamp = millis();
+      digitalWrite(GREEN_PIN, LOW);
+      digitalWrite(YELLOW_PIN, HIGH);
+      PT_WAIT_UNTIL(pt, millis() - timestamp > 5000 || interruptFlag);
+      timestamp = millis();
+      digitalWrite(YELLOW_PIN, LOW);
+      digitalWrite(RED_PIN, HIGH);
+      PT_WAIT_UNTIL(pt, millis() - timestamp > 25000 || interruptFlag);
+      timestamp = millis();
+      digitalWrite(RED_PIN, LOW);
       break;
-    case 226:
-    digitalWrite(green, HIGH);
-      digitalWrite(yellow, HIGH);
-      digitalWrite(red, HIGH);
+    
+    // WHITE: ALL ON
+    case FF22DD:
+      digitalWrite(GREEN_PIN, HIGH);
+      digitalWrite(YELLOW_PIN, HIGH);
+      digitalWrite(RED_PIN, HIGH);
       break;
-    case 34:
+    // PLAY: OFF
+    case FF827D:
+      digitalWrite(GREEN_PIN, LOW);
+      digitalWrite(YELLOW_PIN, LOW);
+      digitalWrite(RED_PIN, LOW);
       break;
     case 2:
       break;
@@ -96,7 +101,19 @@ void translateIR() {
     default:
       break;
   }
+  interruptFlag = false;
+  PT_END(pt);
 }
+
+static int remoteController(struct pt *pt) {
+  PT_BEGIN(pt);
+  if (receiver.decode()) {
+    interruptFlag = true;
+    receiver.resume();
+  }
+  PT_END(pt);
+}
+
 
 // sets initial value for pins so that lights start as "off" 
 // digitalWrite(green, LOW);
@@ -130,7 +147,7 @@ void translateIR() {
 //    delay(400);
 //    var1++;}
 // var = 0
- 
+
 //  //switches to "late night cycle" flashing yellow for 2 minutes, similar to flashing red above
 //  var1=0;
 //   while(var1 < 120) {
