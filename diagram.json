@@ -1,0 +1,52 @@
+{
+    "version": 1,
+    "author": "Anonymous maker",
+    "editor": "wokwi",
+    "parts": [
+      { "type": "wokwi-arduino-uno", "id": "uno", "top": 211.8, "left": 57, "attrs": {} },
+      { "type": "wokwi-ir-remote", "id": "remote1", "top": 57.6, "left": -211.2, "attrs": {} },
+      { "type": "wokwi-ir-receiver", "id": "ir1", "top": -49.35, "left": -20.98, "attrs": {} },
+      { "type": "wokwi-relay-module", "id": "relay1", "top": -105.4, "left": 268.8, "attrs": {} },
+      { "type": "wokwi-relay-module", "id": "relay2", "top": -47.8, "left": 268.8, "attrs": {} },
+      { "type": "wokwi-relay-module", "id": "relay3", "top": 9.8, "left": 268.8, "attrs": {} },
+      { "type": "wokwi-led", "id": "led1", "top": -147.6, "left": 455, "attrs": { "color": "red" } },
+      {
+        "type": "wokwi-led",
+        "id": "led2",
+        "top": -61.2,
+        "left": 455,
+        "attrs": { "color": "yellow" }
+      },
+      {
+        "type": "wokwi-led",
+        "id": "led3",
+        "top": -13.2,
+        "left": 455,
+        "attrs": { "color": "limegreen" }
+      }
+    ],
+    "connections": [
+      [ "uno:10", "relay3:IN", "green", [ "v0" ] ],
+      [ "uno:11", "relay2:IN", "green", [ "v0" ] ],
+      [ "uno:12", "relay1:IN", "green", [ "v0" ] ],
+      [ "relay2:GND", "relay3:GND", "black", [ "h-96", "v57.2" ] ],
+      [ "relay1:GND", "relay2:GND", "black", [ "h-96", "v57.2" ] ],
+      [ "uno:GND.2", "relay3:GND", "black", [ "v38.3", "h128.7", "v-355.2", "h-86.4" ] ],
+      [ "uno:5V", "relay3:VCC", "red", [ "v19.1", "h128.6", "v-316.8", "h-76.8" ] ],
+      [ "relay2:VCC", "relay3:VCC", "red", [ "h0" ] ],
+      [ "relay1:VCC", "relay2:VCC", "red", [ "h0" ] ],
+      [ "relay1:NO", "led1:A", "green", [ "h0" ] ],
+      [ "led2:A", "relay2:NO", "green", [ "v0" ] ],
+      [ "led3:A", "relay3:NO", "green", [ "v19.2", "h-96" ] ],
+      [ "uno:5V", "relay1:COM", "red", [ "v-537.7", "h186.2", "v57.6" ] ],
+      [ "led1:C", "led2:C", "green", [ "v0" ] ],
+      [ "led2:C", "led3:C", "green", [ "v0" ] ],
+      [ "led3:C", "uno:GND.3", "green", [ "v0" ] ],
+      [ "uno:5V", "relay2:COM", "red", [ "v-537.7", "h186.2", "v115.2" ] ],
+      [ "ir1:DAT", "uno:13", "green", [ "v144", "h297.6" ] ],
+      [ "ir1:VCC", "uno:5V", "red", [ "v412.8", "h345.6" ] ],
+      [ "ir1:GND", "uno:GND.2", "black", [ "v412.8", "h364.8" ] ],
+      [ "uno:5V", "relay3:COM", "red", [ "v-316.9", "h167", "v0", "h19.2", "v-48" ] ]
+    ],
+    "dependencies": {}
+  }
