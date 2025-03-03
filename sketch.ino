@@ -1,4 +1,3 @@
-// #include <IRremote.hpp>
 #include <IRremote.h>
 #include <IRremoteInt.h>
 #include <pt.h>
